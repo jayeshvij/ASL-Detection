@@ -17,7 +17,7 @@ This project detects ASL alphabet signs (A–Z, plus `space`, `del`, and `nothin
 ## Features
 
 - Real-time webcam-based ASL alphabet detection
-- Custom CNN trained from scratch — no pretrained backbone, no external hand-landmark model
+- Custom CNN trained from scratch - no pretrained backbone, no external hand-landmark model
 - Browser-based UI (Flask + vanilla JS) with a live MJPEG video stream, prediction overlay, and inference log
 - Output buffer with append, space, delete, and purge controls, plus one-click copy to clipboard
 - Standalone desktop packaging via PyInstaller
@@ -62,7 +62,7 @@ At inference time the model is loaded with `map_location='cpu'`, so the app runs
 
 ## Dataset
 
-[ASL Alphabet dataset on Kaggle](https://www.kaggle.com/grassknoted/asl-alphabet) — 87,000 images across 29 classes (A–Z, `del`, `nothing`, `space`). A configurable subset of images per class is sampled and resized to 224×224 during preprocessing.
+[ASL Alphabet dataset on Kaggle](https://www.kaggle.com/grassknoted/asl-alphabet) - 87,000 images across 29 classes (A–Z, `del`, `nothing`, `space`). A configurable subset of images per class is sampled and resized to 224×224 during preprocessing.
 
 ## Tech Stack
 
@@ -114,11 +114,11 @@ At inference time the model is loaded with `map_location='cpu'`, so the app runs
 └───app.spec
 ```
 
-- `input/` — original Kaggle data plus the preprocessed, resized images used for training.
-- `outputs/` — trained model weights, label binarizer, accuracy/loss plots, test predictions, and recorded webcam sessions.
-- `templates/` — frontend for the Flask web app.
-- `src/` — all the Python source files (see below).
-- `app.spec` — PyInstaller spec for building a standalone executable.
+- `input/` - original Kaggle data plus the preprocessed, resized images used for training.
+- `outputs/` - trained model weights, label binarizer, accuracy/loss plots, test predictions, and recorded webcam sessions.
+- `templates/` - frontend for the Flask web app.
+- `src/` - all the Python source files (see below).
+- `app.spec` - PyInstaller spec for building a standalone executable.
 
 ### Source Files
 
@@ -130,7 +130,7 @@ At inference time the model is loaded with `map_location='cpu'`, so the app runs
 | `train.py` | Trains the model on the preprocessed dataset |
 | `test.py` | Runs inference on static test images |
 | `cam_test.py` | Real-time detection via a plain OpenCV window |
-| `app.py` | Flask web app — live webcam detection with a full UI |
+| `app.py` | Flask web app - live webcam detection with a full UI |
 
 ## Installation
 
@@ -187,6 +187,6 @@ pyinstaller app.spec
 
 ## References
 
-- [ASL Alphabet dataset — Kaggle](https://www.kaggle.com/grassknoted/asl-alphabet)
-- [Changing the contrast and brightness of an image — OpenCV docs](https://docs.opencv.org/3.4/d3/dc1/tutorial_basic_linear_transform.html)
-- [Real-time American Sign Language Recognition with Convolutional Neural Networks](http://cs231n.stanford.edu/reports/2016/pdfs/214_Report.pdf) — Brandon Garcia et al.
+- [ASL Alphabet dataset - Kaggle](https://www.kaggle.com/grassknoted/asl-alphabet)
+- [Changing the contrast and brightness of an image - OpenCV docs](https://docs.opencv.org/3.4/d3/dc1/tutorial_basic_linear_transform.html)
+- [Real-time American Sign Language Recognition with Convolutional Neural Networks](http://cs231n.stanford.edu/reports/2016/pdfs/214_Report.pdf) - Brandon Garcia et al.
