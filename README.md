@@ -32,12 +32,6 @@ Trained for 10 epochs on an 85/15 stratified train-validation split. Train and v
   <img src="assets/loss_plot.png" width="600" alt="Training and validation loss">
 </p>
 
-### Some Sample Predictions
-![](https://github.com/sovit-123/American-Sign-Language-Detection-using-Deep-Learning/blob/master/outputs/A_test.jpg)
-![](https://github.com/sovit-123/American-Sign-Language-Detection-using-Deep-Learning/blob/master/outputs/Z_test.jpg)
-![](https://github.com/sovit-123/American-Sign-Language-Detection-using-Deep-Learning/blob/master/outputs/J_test.jpg)
-![](https://github.com/sovit-123/American-Sign-Language-Detection-using-Deep-Learning/blob/master/outputs/S_test.jpg)
-
 ## Model Architecture
 
 A custom CNN (`CustomCNN` in `src/cnn_models.py`), built from scratch:
