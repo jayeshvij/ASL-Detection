@@ -131,6 +131,9 @@ dmypy.json
 # input data and models
 input/
 
+# large output files
+outputs/asl.mp4
+
 # data files
 *.csv
 *.h5

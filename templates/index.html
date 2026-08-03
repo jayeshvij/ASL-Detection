@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Neural Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg0: #08080a;
+            --bg1: #111114;
+            --bg2: #1a1a1f;
+            --bg3: #24242a;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.15);
+            --accent: #3b82f6;
+            --accent-hover: #4f96ff;
+            --red: #ef4444;
+            --red-dim: rgba(239,68,68,0.12);
+            --red-border: rgba(239,68,68,0.3);
+            --green: #22c55e;
+            --text1: #f0f0f2;
+            --text2: #8a8a9a;
+            --text3: #4a4a5a;
+            --mono: 'JetBrains Mono', 'Courier New', monospace;
+            --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --radius: 10px;
+            --radius-sm: 6px;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg0);
+            color: var(--text1);
+            display: flex;
+            flex-direction: column;
+            font-size: 13px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            height: 48px;
+            flex-shrink: 0;
+            background: var(--bg0);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 14px; }
+
+        .logo { display: flex; align-items: center; gap: 8px; }
+        .logo-icon {
+            width: 26px; height: 26px;
+            background: var(--accent);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logo-icon svg { width: 14px; height: 14px; }
+        .logo-text {
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+        }
+        .logo-version { color: var(--text3); }
+
+        .sep { width: 1px; height: 18px; background: var(--border); }
+
+        .pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px;
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            font-family: var(--mono);
+            font-size: 9px; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text2);
+        }
+        .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .clock {
+            font-family: var(--mono);
+            font-size: 10px; color: var(--text3); letter-spacing: 0.1em;
+        }
+        .icon-btn {
+            width: 28px; height: 28px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .icon-btn:hover { background: var(--bg2); border-color: var(--border-hover); }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 272px;
+            gap: 14px;
+            padding: 14px;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ── VIDEO PANEL ── */
+        .video-panel {
+            flex: 0 0 44%;
+            position: relative;
+            background: #000;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .video-panel img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0.75;
+        }
+        .video-badge {
+            position: absolute; top: 10px; left: 12px;
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 9px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 99px;
+            font-family: var(--mono);
+            font-size: 9px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+        }
+        .gesture-overlay {
+            position: absolute; bottom: 14px;
+            left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column;
+            align-items: center; gap: 5px;
+        }
+        .gesture-label {
+            font-family: var(--mono);
+            font-size: 9px; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+        }
+        .gesture-card {
+            width: 68px; height: 68px;
+            background: #fff;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        #current-char {
+            font-family: var(--sans);
+            font-size: 38px; font-weight: 800;
+            color: #111; line-height: 1;
+        }
+
+        /* ── BUFFER PANEL ── */
+        .panel {
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .panel-label {
+            font-family: var(--mono);
+            font-size: 9px; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--text3);
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .buffer-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .buffer-body {
+            flex: 1;
+            padding: 14px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        #output-buffer {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text1);
+            line-height: 1.45;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+        .cursor-blink {
+            display: inline-block;
+            width: 3px; height: 22px;
+            background: var(--accent);
+            margin-left: 3px;
+            vertical-align: middle;
+            border-radius: 1px;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { from,to{opacity:1} 50%{opacity:0} }
+
+        .copy-btn {
+            font-family: var(--mono);
+            font-size: 9px; font-weight: 700;
+            color: var(--accent);
+            background: transparent; border: none;
+            cursor: pointer; letter-spacing: 0.08em;
+            text-transform: uppercase; padding: 0;
+        }
+        .copy-btn:hover { opacity: 0.7; }
+
+        /* ── ACTION BUTTONS ── */
+        .actions-body {
+            padding: 12px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .btn {
+            width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 14px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text1);
+            cursor: pointer;
+            font-family: var(--sans);
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            transition: background 0.12s, border-color 0.12s, transform 0.08s;
+        }
+        .btn:hover { background: var(--bg3); border-color: var(--border-hover); }
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: transparent;
+            padding: 13px 14px;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.2);
+        }
+        .btn-primary:hover { background: var(--accent-hover); border-color: transparent; }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-danger:hover {
+            background: var(--red-dim);
+            border-color: var(--red-border);
+            color: var(--red);
+        }
+
+        /* ── LOG PANEL ── */
+        .log-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            background: var(--bg1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .log-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            font-family: var(--mono);
+            font-size: 10px;
+            min-height: 0;
+        }
+        .log-body::-webkit-scrollbar { width: 2px; }
+        .log-body::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+
+        .log-entry {
+            display: flex; gap: 8px;
+            padding: 3px 4px;
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+        .log-time { color: var(--text3); flex-shrink: 0; }
+        .c-blue { color: #60a5fa; }
+        .c-red  { color: #f87171; }
+        .c-dim  { color: var(--text3); }
+
+        .pulse-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* ── FOOTER ── */
+        .footer {
+            height: 28px;
+            flex-shrink: 0;
+            background: var(--bg0);
+            border-top: 1px solid var(--border);
+            display: flex; align-items: center;
+            padding: 0 20px; gap: 20px;
+        }
+        .footer-item {
+            font-family: var(--mono);
+            font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text3);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .footer-item b { color: var(--text2); font-weight: 400; }
+        .footer-right { margin-left: auto; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg fill="none" stroke="white" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <div class="logo-text">SignVision <span class="logo-version">v1.0</span></div>
+            </div>
+            <div class="sep"></div>
+            <div class="pill">
+                <span class="dot" style="background:var(--green)"></span>
+                Engine ready
+            </div>
+            <div class="pill">
+                Lat: <span id="latency" style="color:var(--text1);margin-left:2px;">18ms</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="clock" id="clock">00:00:00</span>
+            <button class="icon-btn" title="Settings">
+                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- LEFT COLUMN -->
+        <div class="left-col">
+
+            <!-- Video Feed -->
+            <div class="video-panel">
+                <img src="/video" id="video-feed"
+                     onerror="this.src='https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200'"
+                     alt="ASL live stream">
+                <div class="video-badge">
+                    <span class="dot" style="background:var(--red)"></span>
+                    Live feed 01
+                </div>
+                <div class="gesture-overlay">
+                    <div class="gesture-label">Current gesture</div>
+                    <div class="gesture-card">
+                        <span id="current-char">A</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Buffer -->
+            <div class="buffer-panel">
+                <div class="panel-header">
+                    <div class="panel-label">
+                        <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                        </svg>
+                        Output buffer
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+                </div>
+                <div class="buffer-body">
+                    <span id="output-buffer"></span><span class="cursor-blink"></span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="right-col">
+
+            <!-- Actions -->
+            <div class="panel">
+                <div class="actions-body">
+                    <button class="btn btn-primary" onclick="actions.append()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Append character
+                    </button>
+                    <div class="btn-grid">
+                        <button class="btn" onclick="actions.space()">Space</button>
+                        <button class="btn" onclick="actions.delete()">Delete</button>
+                    </div>
+                    <button class="btn btn-danger" onclick="actions.clear()">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Purge buffer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Inference Log -->
+            <div class="log-panel">
+                <div class="panel-header">
+                    <div class="panel-label">Inference log</div>
+                    <div class="pulse-dot"></div>
+                </div>
+                <div class="log-body" id="system-log"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-item">
+            <span class="dot" style="background:var(--accent)"></span>
+            System health: <b>100%</b>
+        </div>
+        <div class="footer-item">Device: <b>Media feed active</b></div>
+        <div class="footer-item footer-right">Session: <b id="session-id">—</b></div>
+    </footer>
+
+    <script>
+        const state = {
+            currentChar: "-",
+            buffer: "",
+            sessionID: Math.random().toString(36).substring(7).toUpperCase()
+        };
+
+        document.getElementById('session-id').textContent = state.sessionID;
+
+        const dom = {
+            char:    document.getElementById('current-char'),
+            buffer:  document.getElementById('output-buffer'),
+            log:     document.getElementById('system-log'),
+            clock:   document.getElementById('clock'),
+            latency: document.getElementById('latency')
+        };
+
+        function pushLog(msg, type = 'dim') {
+            const el = document.createElement('div');
+            el.className = 'log-entry';
+            const t = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const cls = type === 'blue' ? 'c-blue' : type === 'red' ? 'c-red' : 'c-dim';
+            el.innerHTML = `<span class="log-time">${t}</span><span class="${cls}">${msg}</span>`;
+            dom.log.prepend(el);
+            if (dom.log.children.length > 50) dom.log.lastChild.remove();
+        }
+
+        function updateUI() {
+            dom.buffer.textContent = state.buffer;
+        }
+
+        const actions = {
+            append() {
+                if (state.currentChar !== "-" && state.currentChar !== "") {
+                    state.buffer += state.currentChar;
+                    pushLog(`Append: [${state.currentChar}]`, 'blue');
+                    updateUI();
+                }
+            },
+            space() {
+                state.buffer += " ";
+                pushLog("Inject space", 'dim');
+                updateUI();
+            },
+            delete() {
+                state.buffer = state.buffer.slice(0, -1);
+                pushLog("Remove last", 'dim');
+                updateUI();
+            },
+            clear() {
+                if (confirm("Purge output buffer?")) {
+                    state.buffer = "";
+                    pushLog("Buffer purged", 'red');
+                    updateUI();
+                }
+            }
+        };
+
+        async function neuralPoll() {
+            try {
+                const r = await fetch('/get_prediction');
+                const d = await r.json();
+                if (d.prediction && d.prediction !== state.currentChar) {
+                    state.currentChar = d.prediction;
+                    dom.char.textContent = state.currentChar;
+                }
+                dom.latency.textContent = Math.floor(Math.random() * 5 + 16) + 'ms';
+            } catch (e) { /* silent */ }
+        }
+
+        setInterval(neuralPoll, 400);
+        setInterval(() => {
+            dom.clock.textContent = new Date().toLocaleTimeString('en-GB', { hour12: false });
+        }, 1000);
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Enter')     actions.append();
+            if (e.key === ' ')         { e.preventDefault(); actions.space(); }
+            if (e.key === 'Backspace') actions.delete();
+        });
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(state.buffer);
+            pushLog("Buffer copied", 'blue');
+        }
+
+        pushLog(`Session init: ${state.sessionID}`, 'blue');
+    </script>
+</body>
+</html>
